@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
-import { TranscriptData } from '../types';
-import { Button } from './Button';
-import { TRANSLATE_ICON } from '../constants';
+import { TranscriptData } from '../types.ts';
+import { Button } from './Button.tsx';
+import { TranslateIcon } from '../constants.tsx';
 
 interface TranscriptCardProps {
   data: TranscriptData;
@@ -64,7 +63,7 @@ export const TranscriptCard: React.FC<TranscriptCardProps> = ({ data, onTranslat
               variant="secondary"
               className="bg-indigo-600 hover:bg-indigo-700 border-none shadow-indigo-900/20"
             >
-              {TRANSLATE_ICON}
+              <TranslateIcon />
               Translate to Bangla
             </Button>
           </div>

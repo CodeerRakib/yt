@@ -1,10 +1,9 @@
-
-import React, { useState, useCallback } from 'react';
-import { AppStatus, TranscriptData } from './types';
-import { getTranscriptFromLink, translateToBangla } from './services/geminiService';
-import { Button } from './components/Button';
-import { TranscriptCard } from './components/TranscriptCard';
-import { YOUTUBE_ICON, SEARCH_ICON } from './constants';
+import React, { useState } from 'react';
+import { AppStatus, TranscriptData } from './types.ts';
+import { getTranscriptFromLink, translateToBangla } from './services/geminiService.ts';
+import { Button } from './components/Button.tsx';
+import { TranscriptCard } from './components/TranscriptCard.tsx';
+import { YoutubeIcon, SearchIcon } from './constants.tsx';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState('');
@@ -26,7 +25,8 @@ const App: React.FC = () => {
       setData(result);
       setStatus(AppStatus.SUCCESS);
     } catch (err: any) {
-      setError(err.message || "Failed to retrieve transcript. Please ensure it's a valid YouTube link.");
+      console.error(err);
+      setError(err.message || "ট্রান্সক্রিপ্ট সংগ্রহ করতে সমস্যা হয়েছে। দয়া করে সঠিক লিঙ্ক দিন।");
       setStatus(AppStatus.ERROR);
     }
   };
@@ -40,7 +40,7 @@ const App: React.FC = () => {
       setData(prev => prev ? { ...prev, translation: translated } : null);
     } catch (err) {
       console.error("Translation error:", err);
-      alert("Failed to translate. Please try again.");
+      alert("অনুবাদ করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
     } finally {
       setIsTranslating(false);
     }
@@ -52,17 +52,15 @@ const App: React.FC = () => {
       <nav className="py-6 flex items-center justify-between max-w-7xl mx-auto mb-12 border-b border-slate-800">
         <div className="flex items-center gap-2">
           <div className="bg-red-600 p-2 rounded-lg text-white">
-            {YOUTUBE_ICON}
+            <YoutubeIcon />
           </div>
           <h1 className="text-xl font-bold tracking-tight">TubeTrans<span className="text-red-500">.</span></h1>
         </div>
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
           <a href="#" className="hover:text-white transition-colors">How it works</a>
-          <a href="#" className="hover:text-white transition-colors">Pricing</a>
-          <a href="#" className="hover:text-white transition-colors">GitHub</a>
+          <a href="#" className="hover:text-white transition-colors">Github Repo</a>
         </div>
         <div className="flex items-center gap-4">
-          <button className="text-sm font-medium hover:text-white text-slate-400">Sign In</button>
           <Button variant="primary" className="text-sm px-4 py-1.5">Get Started</Button>
         </div>
       </nav>
@@ -71,12 +69,11 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight leading-tight">
-            Unlock Video Knowledge <br />
-            <span className="gradient-text">Translated to Bangla.</span>
+            YouTube Transcript & <br />
+            <span className="gradient-text">Bangla Translator.</span>
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
-            Instantly extract transcripts from any YouTube video and translate them into fluent Bangla. 
-            Perfect for students, researchers, and creators.
+            Paste any YouTube video link below to generate a detailed transcript and translate it into Bangla instantly.
           </p>
 
           <form onSubmit={handleGenerate} className="max-w-3xl mx-auto relative">
@@ -85,7 +82,7 @@ const App: React.FC = () => {
                 type="text" 
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Paste YouTube video link here (e.g., https://youtube.com/watch?v=...)"
+                placeholder="Paste YouTube link (e.g. https://youtu.be/...)"
                 className="flex-1 bg-transparent border-none focus:ring-0 px-4 py-3 text-lg placeholder:text-slate-500"
               />
               <Button 
@@ -93,7 +90,7 @@ const App: React.FC = () => {
                 isLoading={status === AppStatus.LOADING}
                 className="hidden md:flex min-w-[160px]"
               >
-                {SEARCH_ICON}
+                <SearchIcon />
                 Generate
               </Button>
             </div>
@@ -103,8 +100,8 @@ const App: React.FC = () => {
                 isLoading={status === AppStatus.LOADING}
                 className="w-full"
               >
-                {SEARCH_ICON}
-                Generate Transcript
+                <SearchIcon />
+                Generate
               </Button>
             </div>
           </form>
@@ -129,31 +126,26 @@ const App: React.FC = () => {
         {status === AppStatus.IDLE && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24">
             <FeatureCard 
-              icon="⚡" 
-              title="Lightning Fast" 
-              description="AI-powered extraction means you get your transcript in seconds, not minutes."
+              icon="🚀" 
+              title="Fast Extraction" 
+              description="Extract transcripts in seconds using advanced AI search grounding."
             />
             <FeatureCard 
               icon="🇧🇩" 
-              title="Native Bangla" 
-              description="High-quality translation that understands context, technical terms, and nuances."
+              title="Bangla Support" 
+              description="High-quality translation into Bangla with native accuracy and natural tone."
             />
             <FeatureCard 
-              icon="📱" 
-              title="Responsive Design" 
-              description="Access your transcripts anywhere - on mobile, tablet, or desktop with ease."
+              icon="📦" 
+              title="GitHub Deploy" 
+              description="Optimized for direct deployment on GitHub Pages or other static platforms."
             />
           </div>
         )}
       </main>
 
       <footer className="mt-32 border-t border-slate-800 pt-12 text-center text-slate-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} TubeTrans AI. Powered by Gemini Pro. Deployable via GitHub.</p>
-        <div className="mt-4 flex justify-center gap-6">
-          <a href="#" className="hover:text-red-500 transition-colors">Terms</a>
-          <a href="#" className="hover:text-red-500 transition-colors">Privacy</a>
-          <a href="#" className="hover:text-red-500 transition-colors">Support</a>
-        </div>
+        <p>&copy; {new Date().getFullYear()} TubeTrans AI. All rights reserved.</p>
       </footer>
     </div>
   );

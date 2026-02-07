@@ -1,22 +1,25 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { TranscriptData } from "../types";
+import { TranscriptData } from "../types.ts";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+const getAI = () => {
+  return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+};
 
 export const getTranscriptFromLink = async (url: string): Promise<TranscriptData> => {
   const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   const videoId = videoIdMatch ? videoIdMatch[1] : null;
 
   if (!videoId) {
-    throw new Error("Invalid YouTube URL");
+    throw new Error("Invalid YouTube URL. Please provide a full link (e.g., https://www.youtube.com/watch?v=...)");
   }
 
-  // Since actual transcript fetching via browser fetch() is blocked by YouTube's CORS,
-  // we use Gemini's Google Search capabilities to find the content or simulated reasoning.
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Analyze this YouTube video URL: ${url}. Provide the video title, author, and a comprehensive transcript or detailed summary of its contents based on your knowledge or search. Respond in JSON format.`,
+    contents: `Analyze this YouTube video link: ${url}. 
+    Please retrieve or reconstruct a highly detailed transcript/summary of the video content. 
+    Return the response strictly as a JSON object with 'title', 'author', and 'transcript' keys.`,
     config: {
       responseMimeType: "application/json",
       responseSchema: {
@@ -24,7 +27,7 @@ export const getTranscriptFromLink = async (url: string): Promise<TranscriptData
         properties: {
           title: { type: Type.STRING },
           author: { type: Type.STRING },
-          transcript: { type: Type.STRING, description: "The full transcript text or a very detailed point-by-point summary." }
+          transcript: { type: Type.STRING, description: "A comprehensive and detailed transcript of the video." }
         },
         required: ["title", "author", "transcript"]
       },
@@ -40,14 +43,15 @@ export const getTranscriptFromLink = async (url: string): Promise<TranscriptData
 };
 
 export const translateToBangla = async (text: string): Promise<string> => {
+  const ai = getAI();
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Translate the following YouTube video transcript summary into natural, fluent Bangla. Maintain the original meaning and technical terms if appropriate, but ensure it reads well in Bangla script.\n\nText: ${text}`,
+    contents: `Translate the following YouTube video transcript into natural, fluent, and professional Bangla. Ensure the language is easy to read for native speakers.\n\nText:\n${text}`,
     config: {
-      systemInstruction: "You are an expert translator specializing in English to Bangla translation for technical and educational content.",
+      systemInstruction: "You are a professional English-to-Bangla translator specializing in digital media content.",
       temperature: 0.7,
     }
   });
 
-  return response.text || "Translation failed.";
+  return response.text || "অনুবাদ ব্যর্থ হয়েছে।";
 };
